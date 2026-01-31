@@ -22,11 +22,31 @@ const RecentActivity = () => {
     const { currentWorkspace } = useSelector((state) => state.workspace);
 
     const getTasksFromCurrentWorkspace = () => {
+        if (!currentWorkspace || !currentWorkspace.projects) {
+            setTasks([]);
+            return;
+        }
 
-        if (!currentWorkspace) return;
+        try {
+            const allTasks = currentWorkspace.projects
+                .filter(project => project && Array.isArray(project.tasks))
+                .flatMap(project => project.tasks || [])
+                .filter(task => task && task.id) // Filter out invalid tasks
+                .sort((a, b) => {
+                    // Sort by updatedAt descending
+                    try {
+                        return new Date(b.updatedAt) - new Date(a.updatedAt);
+                    } catch {
+                        return 0;
+                    }
+                })
+                .slice(0, 10); // Limit to 10 most recent
 
-        const tasks = currentWorkspace.projects.flatMap((project) => project.tasks.map((task) => task));
-        setTasks(tasks);
+            setTasks(allTasks);
+        } catch (error) {
+            console.error('Error getting tasks:', error);
+            setTasks([]);
+        }
     };
 
     useEffect(() => {
@@ -50,6 +70,8 @@ const RecentActivity = () => {
                 ) : (
                     <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
                         {tasks.map((task) => {
+                            if (!task || !task.id) return null;
+
                             const TypeIcon = typeIcons[task.type]?.icon || Square;
                             const iconColor = typeIcons[task.type]?.color || "text-gray-500 dark:text-gray-400";
 
@@ -62,25 +84,29 @@ const RecentActivity = () => {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between mb-2">
                                                 <h4 className="text-zinc-800 dark:text-zinc-200 truncate">
-                                                    {task.title}
+                                                    {task.title || 'Untitled Task'}
                                                 </h4>
                                                 <span className={`ml-2 px-2 py-1 rounded text-xs dark:text-white ${statusColors[task.status] || "bg-zinc-300 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300"}`}>
-                                                    {task.status.replace("_", " ")}
+                                                    {task.status ? task.status.replace("_", " ") : 'TODO'}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
-                                                <span className="capitalize">{task.type.toLowerCase()}</span>
-                                                {task.assignee && (
+                                                <span className="capitalize">
+                                                    {task.type ? task.type.toLowerCase() : 'task'}
+                                                </span>
+                                                {task.assignee && task.assignee.name && (
                                                     <div className="flex items-center gap-1">
                                                         <div className="w-4 h-4 bg-zinc-300 dark:bg-zinc-700 rounded-full flex items-center justify-center text-[10px] text-zinc-800 dark:text-zinc-200">
-                                                            {task.assignee.name[0].toUpperCase()}
+                                                            {task.assignee.name[0]?.toUpperCase() || '?'}
                                                         </div>
                                                         {task.assignee.name}
                                                     </div>
                                                 )}
-                                                <span>
-                                                    {format(new Date(task.updatedAt), "MMM d, h:mm a")}
-                                                </span>
+                                                {task.updatedAt && (
+                                                    <span>
+                                                        {format(new Date(task.updatedAt), "MMM d, h:mm a")}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

@@ -20,7 +20,7 @@ export default function StatsGrid() {
             icon: FolderOpen,
             title: "Total Projects",
             value: stats.totalProjects,
-            subtitle: `projects in ${currentWorkspace?.name}`,
+            subtitle: `projects in ${currentWorkspace?.name || 'workspace'}`,
             bgColor: "bg-blue-500/10",
             textColor: "text-blue-500",
         },
@@ -51,28 +51,58 @@ export default function StatsGrid() {
     ];
 
     useEffect(() => {
-        if (currentWorkspace) {
+        if (!currentWorkspace || !currentWorkspace.projects) {
             setStats({
-                totalProjects: currentWorkspace.projects.length,
-                activeProjects: currentWorkspace.projects.filter(
+                totalProjects: 0,
+                activeProjects: 0,
+                completedProjects: 0,
+                myTasks: 0,
+                overdueIssues: 0,
+            });
+            return;
+        }
+
+        try {
+            const projects = currentWorkspace.projects || [];
+            const owner = currentWorkspace.owner;
+
+            setStats({
+                totalProjects: projects.length,
+                activeProjects: projects.filter(
                     (p) => p.status !== "CANCELLED" && p.status !== "COMPLETED"
                 ).length,
-                completedProjects: currentWorkspace.projects
+                completedProjects: projects
                     .filter((p) => p.status === "COMPLETED")
-                    .reduce((acc, project) => acc + project.tasks.length, 0),
-                myTasks: currentWorkspace.projects.reduce(
-                    (acc, project) =>
-                        acc +
-                        project.tasks.filter(
-                            (t) => t.assignee?.email === currentWorkspace.owner.email
-                        ).length,
-                    0
-                ),
-                overdueIssues: currentWorkspace.projects.reduce(
-                    (acc, project) =>
-                        acc + project.tasks.filter((t) => t.due_date < new Date()).length,
-                    0
-                ),
+                    .reduce((acc, project) => {
+                        const tasks = project.tasks || [];
+                        return acc + tasks.length;
+                    }, 0),
+                myTasks: projects.reduce((acc, project) => {
+                    const tasks = project.tasks || [];
+                    return acc + tasks.filter((t) => 
+                        t.assignee?.email === owner?.email
+                    ).length;
+                }, 0),
+                overdueIssues: projects.reduce((acc, project) => {
+                    const tasks = project.tasks || [];
+                    return acc + tasks.filter((t) => {
+                        if (!t.due_date) return false;
+                        try {
+                            return new Date(t.due_date) < new Date();
+                        } catch {
+                            return false;
+                        }
+                    }).length;
+                }, 0),
+            });
+        } catch (error) {
+            console.error('Error calculating stats:', error);
+            setStats({
+                totalProjects: 0,
+                activeProjects: 0,
+                completedProjects: 0,
+                myTasks: 0,
+                overdueIssues: 0,
             });
         }
     }, [currentWorkspace]);
