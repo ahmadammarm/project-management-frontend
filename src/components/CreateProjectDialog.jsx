@@ -53,7 +53,7 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
 
             console.log('Sending payload:', payload); 
 
-            const { data } = await api.post(`/projects`, payload, {
+            const { data } = await api.post(`/api/projects`, payload, {
                 headers: {
                     Authorization: `Bearer ${await getToken()}`,
                 },
