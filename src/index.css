@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import "tailwindcss";
+
+* {
+    font-family: 'Outfit', sans-serif;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+@layer base {
+    button {
+        cursor: pointer;
+    }
+
+    ::-webkit-scrollbar {
+        width: 0.5rem;
+    }
+
+    ::-webkit-scrollbar-track {
+        background-color: #e5e7eb;
+    }
+
+    .dark ::-webkit-scrollbar-track {
+        background-color: #1c1c1e;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: #bbc3d1;
+        border-radius: 0.375rem;
+    }
+
+    .dark ::-webkit-scrollbar-thumb {
+        background-color: #374151;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #99a5bc;
+    }
+
+    .dark ::-webkit-scrollbar-thumb:hover {
+        background-color: #4b5563;
+    }
+
+    .dark input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(100%);
+    }
+
+    input[type="checkbox"] {
+        appearance: none;
+        background-color: #d1d5db;
+        border-radius: 9999px;
+        cursor: pointer;
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .dark input[type="checkbox"] {
+        background-color: #374151;
+    }
+
+    input[type="checkbox"]:checked {
+        background-color: #3b82f6;
+    }
+}
+
+/* Light Mode (default) */
+select {
+    background-color: #ffffff;
+    color: #18181b;
+    border: 1px solid #d4d4d8;
+    border-radius: 0.375rem;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    outline: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.25rem 1.25rem;
+}
+
+select:hover {
+    border-color: #a1a1aa;
+}
+
+select:focus {
+    border-color: #3b82f6;
+    ring: 2px;
+    ring-color: rgba(59, 130, 246, 0.1);
+}
+
+select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f4f4f5;
+}
+
+/* Dark Mode */
+select.dark,
+.dark select {
+    background-color: #18181b;
+    color: #f4f4f5;
+    border-color: #3f3f46;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+}
+
+.dark select:hover {
+    border-color: #52525b;
+    background-color: #27272a;
+}
+
+.dark select:focus {
+    border-color: #3b82f6;
+    ring: 2px;
+    ring-color: rgba(59, 130, 246, 0.2);
+    background-color: #18181b;
+}
+
+.dark select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #27272a;
+}
+
+/* Styling untuk option di dark mode */
+.dark select option {
+    background-color: #18181b;
+    color: #f4f4f5;
+    padding: 0.5rem;
+}
+
+.dark select option:hover {
+    background-color: #27272a;
+}
+
+.dark select option:checked {
+    background-color: #3b82f6;
+    color: #ffffff;
+}
