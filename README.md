@@ -1,75 +1,72 @@
-<div align="center">
-  <h1><img src="https://project-management-gs.vercel.app/favicon.ico" width="20" height="20" alt="project-management Favicon">
-   project-management</h1>
-  <p>
-    An open-source project management platform built with ReactJS and Tailwind CSS.
-  </p>
-  <p>
-    <a href="https://github.com/GreatStackDev/project-management/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/GreatStackDev/project-management?style=for-the-badge" alt="License"></a>
-    <a href="https://github.com/GreatStackDev/project-management/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge" alt="PRs Welcome"></a>
-    <a href="https://github.com/GreatStackDev/project-management/issues"><img src="https://img.shields.io/github/issues/GreatStackDev/project-management?style=for-the-badge" alt="GitHub issues"></a>
-  </p>
-</div>
+# Project Management App - Frontend
 
----
+A modern project management application built with React, Redux, and Tailwind CSS. This application provides workspace management, project tracking, and task assignment features with real-time collaboration.
 
-## 📖 Table of Contents
+## Tech Stack
 
-- [✨ Features](#-features)
-- [🛠️ Tech Stack](#-tech-stack)
-- [🚀 Getting Started](#-getting-started)
-- [🤝 Contributing](#-contributing)
-- [📜 License](#-license)
+- React - UI Library
+- Redux Toolkit - State Management
+- React Router - Routing
+- Clerk - Authentication & User Management
+- Axios - HTTP Client
+- Tailwind CSS - Styling
+- Lucide React - Icons
+- Vite - Build Tool
 
----
+## Features
 
-## 📝 Features <a name="-features"></a>
+- 🏢 Multi-workspace support
+- 👥 Team collaboration with role-based access
+- 📋 Project and task management
+- 🔔 Real-time notifications
+- 🌓 Dark mode support
+- 📧 Email notifications for task assignments
+- 🔄 Webhook integration with Clerk and Inngest
 
-- **Multiple Workspaces:** Allow multiple workspaces to be created, each with its own set of projects, tasks, and members.
-- **Project Management:** Manage projects, tasks, and team members.
-- **Analytics:** View project analytics, including progress, completion rate, and team size.
-- **Task Management:** Assign tasks to team members, set due dates, and track task status.
-- **User Management:** Invite team members, manage user roles, and view user activity.
+## Project Structure
+```
+frontend/
+├── src/
+│   ├── app/           # Redux store configuration
+│   ├── components/    # Reusable React components
+│   ├── config/        # Axios instance and API configuration
+│   ├── features/      # Redux slices (workspace, theme, etc.)
+│   ├── pages/         # Application pages/routes
+│   └── App.jsx        # Main application component
+```
 
-## 🛠️ Tech Stack <a name="-tech-stack"></a>
+## Prerequisites
 
-- **Framework:** ReactJS
-- **Styling:** Tailwind CSS
-- **UI Components:** Lucide React for icons
-- **State Management:** Redux Toolkit
+- Node.js (v16 or higher)
+- npm or pnpm
+- Git
 
-## 🚀 Getting Started <a name="-getting-started"></a>
+## Environment Variables
 
-First, install the dependencies. We recommend using `npm` for this project.
+Create a `.env` file in the root directory:
+```env
+VITE_API_URL=http://localhost:3000
+VITE_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+```
 
+## Installation
 ```bash
+# Clone repository
+git clone https://github.com/ahmadammarm/project-management-frontend.git
+cd project-management-frontend
+
+# Install dependencies
 npm install
-```
 
-Then, run the development server:
-
-```bash
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) with your browser to see the result.
+## Deployment
 
-You can start editing the page by modifying `src/App.jsx`. The page auto-updates as you edit the file.
+This project is optimized for deployment on Vercel:
 
----
-
-## 🤝 Contributing <a name="-contributing"></a>
-
-We welcome contributions! Please see our [CONTRIBUTING.md](./CONTRIBUTING.md) for more details on how to get started.
-
----
-
-## 📜 License <a name="-license"></a>
-
-This project is licensed under the MIT License. See the [LICENSE.md](./LICENSE.md) file for details.
+1. Push your code to GitHub
+2. Import project to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
