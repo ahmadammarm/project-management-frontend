@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
 import { Outlet } from 'react-router-dom'
@@ -11,10 +11,6 @@ import { fetchWorkspaces } from '../features/workspaceSlice'
 const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
-    const [waitingForWorkspace, setWaitingForWorkspace] = useState(false)
-    const hasFetchedRef = useRef(false)
-    const lastFetchTimeRef = useRef(0)
-    const pollIntervalRef = useRef(null)
 
     const { loading, workspaces } = useSelector(
         (state) => state.workspace
@@ -29,75 +25,31 @@ const Layout = () => {
         dispatch(loadTheme())
     }, [dispatch])
 
-    // Fetch workspaces when user is logged in
+    // Fetch workspaces saat user login
     useEffect(() => {
         if (!isLoaded || !user) return;
-
-        if (hasFetchedRef.current && workspaces.length > 0) return;
 
         const loadWorkspaces = async () => {
             try {
                 const token = await getToken();
                 await dispatch(fetchWorkspaces(token));
-                hasFetchedRef.current = true;
-                lastFetchTimeRef.current = Date.now();
             } catch (error) {
                 console.error('Error loading workspaces:', error);
             }
         };
 
         loadWorkspaces();
-    }, [isLoaded, user?.id, dispatch, getToken, workspaces.length]);
+    }, [isLoaded, user?.id, dispatch, getToken]);
 
-    // Polling saat waiting for workspace (setelah create organization)
-    useEffect(() => {
-        if (!waitingForWorkspace || workspaces.length > 0) {
-            if (pollIntervalRef.current) {
-                clearInterval(pollIntervalRef.current);
-                pollIntervalRef.current = null;
-            }
-            if (workspaces.length > 0) {
-                setWaitingForWorkspace(false);
-            }
-            return;
-        }
-
-        const pollWorkspaces = async () => {
-            try {
-                const token = await getToken();
-                await dispatch(fetchWorkspaces(token));
-            } catch (error) {
-                console.error('Error polling workspaces:', error);
-            }
-        };
-
-        // Poll setiap 2 detik
-        pollIntervalRef.current = setInterval(pollWorkspaces, 2000);
-
-        return () => {
-            if (pollIntervalRef.current) {
-                clearInterval(pollIntervalRef.current);
-            }
-        };
-    }, [waitingForWorkspace, workspaces.length, dispatch, getToken]);
-
-    // Auto-refresh on window focus
+    // Auto-refresh saat window focus (user kembali ke tab)
     useEffect(() => {
         if (!user || !isLoaded) return;
 
         const handleFocus = async () => {
-            const now = Date.now();
-            const timeSinceLastFetch = now - lastFetchTimeRef.current;
-            const REFRESH_COOLDOWN = 30000;
-
-            if (timeSinceLastFetch < REFRESH_COOLDOWN) {
-                return;
-            }
-
+            console.log('Window focused, refreshing workspaces...');
             try {
                 const token = await getToken();
                 await dispatch(fetchWorkspaces(token));
-                lastFetchTimeRef.current = now;
             } catch (error) {
                 console.error('Error refreshing workspaces:', error);
             }
@@ -107,13 +59,12 @@ const Layout = () => {
         return () => window.removeEventListener('focus', handleFocus);
     }, [user, isLoaded, dispatch, getToken]);
 
+    // Manual refresh handler
     const handleRefresh = async () => {
         setIsRefreshing(true);
         try {
             const token = await getToken();
             await dispatch(fetchWorkspaces(token));
-            lastFetchTimeRef.current = Date.now();
-            hasFetchedRef.current = true;
         } catch (error) {
             console.error('Error refreshing workspaces:', error);
         } finally {
@@ -133,32 +84,21 @@ const Layout = () => {
         return (
             <div className="flex items-center justify-center h-screen bg-white dark:bg-zinc-950">
                 <div className="w-full max-w-md p-6">
-                    <SignIn afterSignInUrl="/" />
+                    <SignIn
+                        afterSignInUrl="/"
+                    />
                 </div>
             </div>
         )
     }
 
-    if (loading && !hasFetchedRef.current) {
+    if (loading) {
         return (
             <div className="flex items-center justify-center h-screen bg-white dark:bg-zinc-950">
                 <div className="text-center space-y-4">
                     <Loader2Icon className="size-7 text-blue-500 animate-spin mx-auto" />
                     <p className="text-sm text-zinc-600 dark:text-zinc-400">
                         Loading your workspaces...
-                    </p>
-                </div>
-            </div>
-        )
-    }
-
-    if (waitingForWorkspace) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-white dark:bg-zinc-950">
-                <div className="text-center space-y-4">
-                    <Loader2Icon className="size-7 text-blue-500 animate-spin mx-auto" />
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                        Setting up your workspace...
                     </p>
                 </div>
             </div>
@@ -178,9 +118,9 @@ const Layout = () => {
                         </p>
                     </div>
 
-                    <div onClick={() => setWaitingForWorkspace(true)}>
-                        <CreateOrganization />
-                    </div>
+                    <CreateOrganization
+                        afterCreateOrganizationUrl="/"
+                    />
 
                     <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
                         <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-3">
