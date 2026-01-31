@@ -30,6 +30,7 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {
+        e.preventDefault();
 
         try {
             if (!formData.team_lead) {
@@ -37,24 +38,48 @@ const CreateProjectDialog = ({ isDialogOpen, setIsDialogOpen }) => {
             }
             setIsSubmitting(true);
 
-            const { data } = await api.post(`/api/projects`, {
+            const payload = {
                 workspaceId: currentWorkspace.id,
-                ...formData,
-            }, {
+                name: formData.name,
+                description: formData.description,
+                status: formData.status,
+                priority: formData.priority,
+                progress: formData.progress,
+                team_members: formData.team_members,
+                team_lead: formData.team_lead,
+                start_date: formData.start_date ? new Date(formData.start_date).toISOString() : null,
+                end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
+            };
+
+            console.log('Sending payload:', payload); 
+
+            const { data } = await api.post(`/projects`, payload, {
                 headers: {
                     Authorization: `Bearer ${await getToken()}`,
                 },
             });
-            dispatch(addProject(data.project))
+
+            dispatch(addProject(data.project));
             setIsDialogOpen(false);
+            setFormData({ // Reset form
+                name: "",
+                description: "",
+                status: "PLANNING",
+                priority: "MEDIUM",
+                start_date: "",
+                end_date: "",
+                team_members: [],
+                team_lead: "",
+                progress: 0,
+            });
             toast.success("Project created successfully!");
         } catch (error) {
             console.error("Error creating project:", error);
-            toast.error("Failed to create project. Please try again.");
+            console.error("Error response:", error.response?.data); // Debug log
+            toast.error(error.response?.data?.message || "Failed to create project. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
-
     };
 
     const removeTeamMember = (email) => {
