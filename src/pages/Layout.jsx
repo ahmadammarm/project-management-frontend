@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Navbar from '../components/Navbar'
 import Sidebar from '../components/Sidebar'
 import { Outlet } from 'react-router-dom'
@@ -11,6 +11,8 @@ import { fetchWorkspaces } from '../features/workspaceSlice'
 const Layout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
+    const hasFetchedRef = useRef(false) // Track apakah sudah fetch
+    const lastFetchTimeRef = useRef(0) // Track waktu terakhir fetch
 
     const { loading, workspaces } = useSelector(
         (state) => state.workspace
@@ -25,31 +27,47 @@ const Layout = () => {
         dispatch(loadTheme())
     }, [dispatch])
 
-    // Fetch workspaces saat user login
+    // Fetch workspaces saat user login (hanya sekali)
     useEffect(() => {
         if (!isLoaded || !user) return;
+        
+        // Jika sudah pernah fetch dan workspaces ada, skip
+        if (hasFetchedRef.current && workspaces.length > 0) return;
 
         const loadWorkspaces = async () => {
             try {
                 const token = await getToken();
                 await dispatch(fetchWorkspaces(token));
+                hasFetchedRef.current = true;
+                lastFetchTimeRef.current = Date.now();
             } catch (error) {
                 console.error('Error loading workspaces:', error);
             }
         };
 
         loadWorkspaces();
-    }, [isLoaded, user?.id, dispatch, getToken]);
+    }, [isLoaded, user?.id, dispatch, getToken, workspaces.length]);
 
-    // Auto-refresh saat window focus (user kembali ke tab)
+    // Auto-refresh saat window focus (dengan debounce)
     useEffect(() => {
         if (!user || !isLoaded) return;
 
         const handleFocus = async () => {
+            const now = Date.now();
+            const timeSinceLastFetch = now - lastFetchTimeRef.current;
+            const REFRESH_COOLDOWN = 30000; // 30 detik cooldown
+
+            // Hanya refresh jika sudah lebih dari 30 detik sejak fetch terakhir
+            if (timeSinceLastFetch < REFRESH_COOLDOWN) {
+                console.log('Skipping refresh, too soon since last fetch');
+                return;
+            }
+
             console.log('Window focused, refreshing workspaces...');
             try {
                 const token = await getToken();
                 await dispatch(fetchWorkspaces(token));
+                lastFetchTimeRef.current = now;
             } catch (error) {
                 console.error('Error refreshing workspaces:', error);
             }
@@ -65,6 +83,7 @@ const Layout = () => {
         try {
             const token = await getToken();
             await dispatch(fetchWorkspaces(token));
+            lastFetchTimeRef.current = Date.now();
         } catch (error) {
             console.error('Error refreshing workspaces:', error);
         } finally {
@@ -92,7 +111,8 @@ const Layout = () => {
         )
     }
 
-    if (loading) {
+    // Hanya tampilkan loading pada initial fetch, bukan saat refresh
+    if (loading && !hasFetchedRef.current) {
         return (
             <div className="flex items-center justify-center h-screen bg-white dark:bg-zinc-950">
                 <div className="text-center space-y-4">
